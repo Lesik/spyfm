@@ -17,13 +17,15 @@ class SPyFM(Gtk.Window):
         self.set_default_size(700, 700)
 
         scrolledwindow = Gtk.ScrolledWindow(None, None)
-        self.store = Gtk.ListStore(str)
+        self.store = Gtk.ListStore(str, str)
         self.tree = Gtk.TreeView(self.store)
         scrolledwindow.add(self.tree)
 
         renderer = Gtk.CellRendererText()
         column_name = Gtk.TreeViewColumn("Name", renderer, text=0)
+        column_size = Gtk.TreeViewColumn("Size", renderer, text=1)
         self.tree.append_column(column_name)
+        self.tree.append_column(column_size)
         self.tree.connect('row-activated', self.on_tree_row_activated)
 
         self.add(scrolledwindow)
@@ -35,7 +37,11 @@ class SPyFM(Gtk.Window):
         for item in listdir(self.currentdir):
             path = join(self.currentdir, item)
             if not item.startswith("."):
-                self.store.append([item])
+                if isdir(path):
+                    size = "Folder"
+                else:
+                    size = str(getsize(path)) + " bytes"
+                self.store.append([item, size])
 
     def on_tree_row_activated(self, treeview, path, view_column):
         # TODO fully understand the following line
