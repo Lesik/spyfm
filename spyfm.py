@@ -18,11 +18,13 @@ class SPyFM(Gtk.Window):
 
         scrolledwindow = Gtk.ScrolledWindow(None, None)
         self.store = Gtk.ListStore(str, str)
+        self.store.set_sort_func(0, self.sort_func, None)
         self.tree = Gtk.TreeView(self.store)
         scrolledwindow.add(self.tree)
 
         renderer = Gtk.CellRendererText()
         column_name = Gtk.TreeViewColumn("Name", renderer, text=0)
+        column_name.set_sort_column_id(0)
         column_size = Gtk.TreeViewColumn("Size", renderer, text=1)
         self.tree.append_column(column_name)
         self.tree.append_column(column_size)
@@ -31,6 +33,27 @@ class SPyFM(Gtk.Window):
         self.add(scrolledwindow)
         self.show_all()
         self.list()
+
+    def sort_func(self, treemodel, iter1, iter2, user_data):
+        sort_column, _ = treemodel.get_sort_column_id()
+        item1 = treemodel.get_value(iter1, sort_column)
+        item2 = treemodel.get_value(iter2, sort_column)
+
+        path1 = join(self.currentdir, item1)
+        path2 = join(self.currentdir, item2)
+
+        if isdir(path1) ^ isdir(path2):
+            if isdir(path1):
+                return -1
+            else:
+                return 1
+        else:
+            if item1 < item2:
+                return -1
+            elif item1 == item2:
+                return 0
+            else:
+                return 1
 
     def list(self):
         self.store.clear()
