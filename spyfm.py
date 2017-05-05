@@ -16,6 +16,8 @@ class SPyFM(Gtk.Window):
         self.connect('delete-event', Gtk.main_quit)
         self.set_default_size(700, 700)
 
+        # passing None to Gtk.ScrolledWindow constructor according to docs:
+        # https://developer.gnome.org/gtk3/stable/GtkScrolledWindow.html#gtk-scrolled-window-new
         scrolledwindow = Gtk.ScrolledWindow(None, None)
         self.store = Gtk.ListStore(str, str)
         self.store.set_sort_func(0, self.sort_func, None)
@@ -42,12 +44,16 @@ class SPyFM(Gtk.Window):
         path1 = join(self.currentdir, item1)
         path2 = join(self.currentdir, item2)
 
+        # if either path1 or path2 is folder but not both
         if isdir(path1) ^ isdir(path2):
+            # show the folder first
             if isdir(path1):
                 return -1
             else:
                 return 1
+        # else either both or none of them are folders
         else:
+            # do normal sorting
             if item1 < item2:
                 return -1
             elif item1 == item2:
@@ -56,10 +62,13 @@ class SPyFM(Gtk.Window):
                 return 1
 
     def list(self):
+        # clear previous items, if any
         self.store.clear()
         for item in listdir(self.currentdir):
             path = join(self.currentdir, item)
+            # do not show hidden files
             if not item.startswith("."):
+                # do not calculate size for folders
                 if isdir(path):
                     size = "Folder"
                 else:
