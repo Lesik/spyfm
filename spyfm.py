@@ -16,6 +16,8 @@ class SPyFM(Gtk.Window):
         self.connect('delete-event', Gtk.main_quit)
         self.set_default_size(700, 700)
 
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+
         # passing None to Gtk.ScrolledWindow constructor according to docs:
         # https://developer.gnome.org/gtk3/stable/GtkScrolledWindow.html#gtk-scrolled-window-new
         scrolledwindow = Gtk.ScrolledWindow(None, None)
@@ -23,6 +25,12 @@ class SPyFM(Gtk.Window):
         self.store.set_sort_func(0, self.sort_func, None)
         self.tree = Gtk.TreeView(self.store)
         scrolledwindow.add(self.tree)
+        box.pack_end(scrolledwindow, True, True, 0)
+
+        entry_path = Gtk.Entry()
+        entry_path.set_text(self.currentdir)
+        entry_path.connect('activate', self.on_entry_path_activated)
+        box.pack_start(entry_path, False, False, 0)
 
         renderer = Gtk.CellRendererText()
         column_name = Gtk.TreeViewColumn("Name", renderer, text=0)
@@ -32,9 +40,16 @@ class SPyFM(Gtk.Window):
         self.tree.append_column(column_size)
         self.tree.connect('row-activated', self.on_tree_row_activated)
 
-        self.add(scrolledwindow)
+        self.add(box)
         self.show_all()
         self.list()
+
+    def on_entry_path_activated(self, entry):
+        if isdir(entry.get_text()):
+            self.currentdir = entry.get_text()
+            self.list()
+        else:
+            entry.set_text(self.currentdir)
 
     def sort_func(self, treemodel, iter1, iter2, user_data):
         sort_column, _ = treemodel.get_sort_column_id()
