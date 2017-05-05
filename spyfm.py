@@ -5,7 +5,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from os import listdir
-from os.path import expanduser, join
+from os.path import expanduser, join, isdir, getsize
 
 class SPyFM(Gtk.Window):
 
@@ -14,16 +14,19 @@ class SPyFM(Gtk.Window):
     def __init__(self):
         super().__init__(title="SPyFM")
         self.connect('delete-event', Gtk.main_quit)
+        self.set_default_size(700, 700)
 
+        scrolledwindow = Gtk.ScrolledWindow(None, None)
         self.store = Gtk.ListStore(str)
         self.tree = Gtk.TreeView(self.store)
+        scrolledwindow.add(self.tree)
 
         renderer = Gtk.CellRendererText()
         column_name = Gtk.TreeViewColumn("Name", renderer, text=0)
         self.tree.append_column(column_name)
         self.tree.connect('row-activated', self.on_tree_row_activated)
 
-        self.add(self.tree)
+        self.add(scrolledwindow)
         self.show_all()
         self.list()
 
