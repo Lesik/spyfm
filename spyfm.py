@@ -6,6 +6,8 @@ from gi.repository import Gtk
 
 from os import listdir
 from os.path import expanduser, join, isdir, getsize
+from sys import platform
+from subprocess import call
 
 class SPyFM(Gtk.Window):
 
@@ -97,6 +99,12 @@ class SPyFM(Gtk.Window):
         if isdir(path):
             self.currentdir = path
             self.list()
+        # else open file
+        else:
+            # some linux identify as linux, some as linux2
+            # see https://bugs.python.org/issue12326
+            if platform.startswith('linux'):
+                call(['xdg-open', path])
 
 if __name__ == "__main__":
     SPyFM()
